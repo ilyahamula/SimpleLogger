@@ -138,7 +138,7 @@ TEST_F(LoggerTestFixture, PrintFormattedString)
 
     std::string text;
     EXPECT_TRUE(GetLogFileText(text));
-    EXPECT_EQ(text, "The value of is  10 and num2 is  3.14");
+    EXPECT_EQ(text, "The value of num1 is  10 and num2 is  3.14");
 }
 
 TEST_F(LoggerTestFixture, PrintCustomType)
