@@ -1,6 +1,7 @@
 #define _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
 #include <gtest/gtest.h>
 #include <fstream>
+#include <climits>
 #include "Logger.h"
 
 namespace
