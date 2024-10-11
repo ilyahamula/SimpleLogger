@@ -1,5 +1,6 @@
 #include "Logger.h"
 
+#include <climits>
 #include <chrono>
 #include <iostream>
 #include <fstream>
