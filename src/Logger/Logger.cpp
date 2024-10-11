@@ -66,30 +66,30 @@ struct sTime
 
     void start()
     {
-        m_start = std::chrono::high_resolution_clock::now();
+        m_start = std::chrono::steady_clock::now();
     }
 
     long long stopSeconds()
     {
-        auto end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<std::chrono::seconds>(end - m_start).count();
     }
 
     long long stopMilliseconds()
     {
-        auto end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<std::chrono::milliseconds>(end - m_start).count();
     }
 
     long long stopMicroseconds()
     {
-        auto end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<std::chrono::microseconds>(end - m_start).count();
     }
 
     long long stopNanoseconds()
     {
-        auto end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_start).count();
     }
 };
