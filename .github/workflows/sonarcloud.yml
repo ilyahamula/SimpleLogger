@@ -1,60 +1,49 @@
 name: SonarCloud Analysis
-
 on:
+  # Тригери запуску GitHub Actions на push у main гілку та при Pull Request
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-
 jobs:
   sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up CMake
-        uses: jwlawson/actions-setup-cmake@v1.11
+        uses: actions/checkout@v2
+      - name: Cache CMake
+        uses: actions/cache@v2
         with:
-          cmake-version: '3.21.3'
-
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install g++-10 gcc-10
-      
-      - name: Download and Install Build Wrapper
+          path: |
+            build
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+      - name: Build project
         run: |
-          mkdir tools
+          mkdir -p build
+          cd build
+          cmake ..
+          cmake --build .
+      - name: Download build-wrapper
+        run: |
           wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip -d tools
-
-      - name: Build project with build-wrapper
+          unzip build-wrapper-linux-x86.zip
+      - name: Run build-wrapper
         run: |
-          tools/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build
-          tools/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build
-
+          mkdir -p build
+          build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-        with:
-          # Additional arguments for the SonarScanner CLI
-          args:
-            # Unique keys of your project and organization. You can find them in SonarCloud > Information (bottom-left menu)
-            # mandatory
-            -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.exclusions="**/tests/**"
-            -Dsonar.cfamily.build-wrapper-output=bw-output
-            # Comma-separated paths to directories containing main source files.
-            #-Dsonar.sources= # optional, default is project base directory
-            # Comma-separated paths to directories containing test source files.
-            #-Dsonar.tests= # optional. For more info about Code Coverage, please refer to https://docs.sonarcloud.io/enriching/test-coverage/overview/
-            # Adds more detail to both client and server-side analysis logs, activating DEBUG mode for the scanner, and adding client-side environment variables and system properties to the server-side log of analysis report processing.
-            #-Dsonar.verbose= # optional, default is false
-          # When you need the analysis to take place in a directory other than the one from which it was launched, default is .
-          projectBaseDir: .
+        run: |
+          sonar-scanner \
+          -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }} \
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory \
+          -Dsonar.sources=. \
+          -Dsonar.cfamily.threads=4
