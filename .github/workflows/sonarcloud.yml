@@ -7,30 +7,27 @@ on:
     branches:
       - main
 jobs:
-  sonarcloud:
-    name: SonarCloud Scan
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       - name: Cache CMake
         uses: actions/cache@v2
         with:
-          path: |
-            build
+          path: build
           key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
       
       - name: Set up C++ build environment
         run: |
           sudo apt-get update
           sudo apt-get install -y g++ cmake unzip wget
-        
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-    
       - name: Build project
         run: |
           mkdir -p build
@@ -57,11 +54,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          JAVA_HOME: /usr/lib/jvm/java-17-temurin
         run: |
           sonar-scanner -X \
           -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }} \
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory \
           -Dsonar.sources=. \
           -Dsonar.cfamily.threads=4
