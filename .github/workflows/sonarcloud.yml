@@ -44,7 +44,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-          PATH: $(pwd)/sonar-scanner-4.6.2.2472-linux/bin:$PATH
         run: |
           sonar-scanner \
           -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }} \
