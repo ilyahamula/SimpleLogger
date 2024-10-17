@@ -33,11 +33,19 @@ jobs:
         run: |
           mkdir -p build
           ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build
+      - name: Install SonarScanner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-11-jre-headless
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip
+          export PATH=$(pwd)/sonar-scanner-4.6.2.2472-linux/bin:$PATH
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          PATH: $(pwd)/sonar-scanner-4.6.2.2472-linux/bin:$PATH
         run: |
           sonar-scanner \
           -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }} \
