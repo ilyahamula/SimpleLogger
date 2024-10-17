@@ -1,6 +1,5 @@
 name: SonarCloud Analysis
 on:
-  # Тригери запуску GitHub Actions на push у main гілку та при Pull Request
   push:
     branches:
       - main
@@ -29,11 +28,11 @@ jobs:
       - name: Download build-wrapper
         run: |
           wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip -d .
       - name: Run build-wrapper
         run: |
           mkdir -p build
-          build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
